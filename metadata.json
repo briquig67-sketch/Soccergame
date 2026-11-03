@@ -1,0 +1,6 @@
+{
+  "name": "Soccer Stars – The Road to the Championship",
+  "description": "A colourful 100-square soccer-themed championship board game with zigzag pitch layout, stadium grandstand borders, and responsive design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

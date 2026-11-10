@@ -17,6 +17,7 @@ import { useSoccerGame } from '../hooks/useSoccerGame';
 import { getKitForCharacter } from '../data/characterKits';
 import { DevTestPanel } from './DevTestPanel';
 import { LeoMovementControls } from './LeoMovementControls';
+import { SettingsModal, AnimationPace } from './SettingsModal';
 
 interface SoccerBoardProps {
   onSquareSelect?: (square: BoardSquareData) => void;
@@ -24,6 +25,8 @@ interface SoccerBoardProps {
   playerCount?: number;
   onOpenCharacterSelect?: () => void;
   onOpenAnimationStudio?: () => void;
+  onGoToMainMenu?: () => void;
+  onOpenHowToPlay?: () => void;
 }
 
 export const SoccerBoard: React.FC<SoccerBoardProps> = ({
@@ -32,20 +35,25 @@ export const SoccerBoard: React.FC<SoccerBoardProps> = ({
   playerCount = 4,
   onOpenCharacterSelect,
   onOpenAnimationStudio,
+  onGoToMainMenu,
+  onOpenHowToPlay,
 }) => {
   const [selectedSquareNum, setSelectedSquareNum] = useState<number | null>(1);
   const [showDirectionArrows, setShowDirectionArrows] = useState<boolean>(true);
   const [showPitchMarkings, setShowPitchMarkings] = useState<boolean>(true);
   const [showDevTestPanel, setShowDevTestPanel] = useState<boolean>(false);
+  const [showSoundSettings, setShowSoundSettings] = useState<boolean>(false);
+  const [animationSpeed, setAnimationSpeed] = useState<AnimationPace>('normal');
 
   // Programmatically generate all 100 squares in zigzag order
   const squares = useMemo(() => generateBoardSquares(), []);
 
   // Multi-player Turn & Dice Game Engine (Stage 4)
+  const stepDurationMs = animationSpeed === 'turbo' ? 110 : animationSpeed === 'fast' ? 200 : 310;
   const game = useSoccerGame({
     initialPlayers: selectedPlayers,
     playerCount: selectedPlayers.length > 0 ? selectedPlayers.length : playerCount,
-    stepDurationMs: 310,
+    stepDurationMs,
   });
 
   const handleSquareClick = (squareNumber: number) => {
@@ -198,6 +206,7 @@ export const SoccerBoard: React.FC<SoccerBoardProps> = ({
         onOpenCharacterSelect={onOpenCharacterSelect}
         isDevModeActive={showDevTestPanel}
         onToggleDevMode={() => setShowDevTestPanel((prev) => !prev)}
+        onOpenSoundSettings={() => setShowSoundSettings(true)}
       />
 
       {/* 4. EVENT POPUP MODAL (When landed on Sprint, Goal Chance, Super Save, Cards) */}
@@ -211,7 +220,9 @@ export const SoccerBoard: React.FC<SoccerBoardProps> = ({
         winner={game.winner}
         onPlayAgain={game.restartGame}
         onMainMenu={() => {
-          if (onOpenCharacterSelect) {
+          if (onGoToMainMenu) {
+            onGoToMainMenu();
+          } else if (onOpenCharacterSelect) {
             onOpenCharacterSelect();
           }
         }}
@@ -222,6 +233,30 @@ export const SoccerBoard: React.FC<SoccerBoardProps> = ({
         
         {/* Left: View Mode Controls */}
         <div className="flex flex-wrap items-center gap-1.5 bg-slate-900/90 border border-slate-700/80 px-2.5 py-1.5 rounded-xl shadow-md">
+          {onGoToMainMenu && (
+            <button
+              type="button"
+              onClick={onGoToMainMenu}
+              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-cartoon font-bold text-xs shadow-md border border-slate-600 flex items-center gap-1 transition-all mr-1 cursor-pointer"
+              title="Return to Main Menu"
+            >
+              <span>🏠</span>
+              <span>Menu</span>
+            </button>
+          )}
+
+          {onOpenHowToPlay && (
+            <button
+              type="button"
+              onClick={onOpenHowToPlay}
+              className="px-2.5 py-1 rounded-lg bg-sky-900/60 hover:bg-sky-800 text-sky-200 hover:text-white font-cartoon font-bold text-xs shadow-md border border-sky-500/50 flex items-center gap-1 transition-all mr-1 cursor-pointer"
+              title="Open How to Play Rules"
+            >
+              <span>📖</span>
+              <span>Rules</span>
+            </button>
+          )}
+
           {onOpenCharacterSelect && (
             <button
               type="button"
@@ -274,6 +309,17 @@ export const SoccerBoard: React.FC<SoccerBoardProps> = ({
             Lines: {showPitchMarkings ? 'ON' : 'OFF'}
           </button>
 
+          {/* GAME & SOUND SETTINGS BUTTON */}
+          <button
+            type="button"
+            onClick={() => setShowSoundSettings(true)}
+            className="px-2.5 py-1 rounded-md text-[11px] font-cartoon font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-400/40 hover:border-sky-300 transition-all cursor-pointer flex items-center gap-1.5"
+            title="Open Game & Sound Settings"
+          >
+            <span>⚙️</span>
+            <span>Settings</span>
+          </button>
+
           {/* DEVELOPER TEST MODE TOGGLE (Separate testing panel) */}
           <button
             type="button"
@@ -313,6 +359,19 @@ export const SoccerBoard: React.FC<SoccerBoardProps> = ({
           )}
         </div>
       </div>
+
+      {/* GAME & SOUND SETTINGS DEDICATED PANEL MODAL */}
+      <SettingsModal
+        isOpen={showSoundSettings}
+        onClose={() => setShowSoundSettings(false)}
+        animationSpeed={animationSpeed}
+        onChangeAnimationSpeed={setAnimationSpeed}
+        showDirectionArrows={showDirectionArrows}
+        onToggleDirectionArrows={() => setShowDirectionArrows((prev) => !prev)}
+        showPitchMarkings={showPitchMarkings}
+        onTogglePitchMarkings={() => setShowPitchMarkings((prev) => !prev)}
+        onResetGame={game.restartGame}
+      />
 
       {/* DEVELOPER TEST MODE SEPARATE TESTING SUITE PANEL */}
       <DevTestPanel

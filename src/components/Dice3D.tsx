@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { soundEngine } from '../utils/audio';
 
 interface Dice3DProps {
@@ -44,9 +44,15 @@ export const Dice3D: React.FC<Dice3DProps> = ({
 
   const [tumbleRot, setTumbleRot] = useState({ x: 0, y: 0, z: 0 });
   const [spinCount, setSpinCount] = useState(0);
+  const isFirstRender = useRef(true);
 
   // When a roll starts, generate multi-revolution 3D trajectory
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     if (isRolling) {
       soundEngine.playDiceRoll();
       // Generate extra revolutions (at least 2 full spins on each axis)

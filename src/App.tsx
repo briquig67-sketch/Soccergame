@@ -9,14 +9,19 @@ import { SoccerBoard } from './components/SoccerBoard';
 import { BoardLegend } from './components/BoardLegend';
 import { CharacterSelection } from './components/CharacterSelection';
 import { AnimationStudio } from './components/AnimationStudio';
+import { SettingsModal } from './components/SettingsModal';
+import { MainMenu } from './components/MainMenu';
+import { HowToPlayModal } from './components/HowToPlayModal';
 import { CHARACTERS } from './data/characters';
 import { PlayerToken, DEMO_PLAYERS } from './types/game';
 
-type AppScreen = 'CHARACTER_SELECT' | 'GAME_BOARD' | 'ANIMATION_STUDIO';
+type AppScreen = 'MAIN_MENU' | 'CHARACTER_SELECT' | 'GAME_BOARD' | 'ANIMATION_STUDIO';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>('GAME_BOARD');
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>('MAIN_MENU');
   const [playerCount, setPlayerCount] = useState<number>(4);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showHowToPlay, setShowHowToPlay] = useState<boolean>(false);
 
   // Player custom names (persisted across screens)
   const [playerNames, setPlayerNames] = useState<Record<number, string>>({
@@ -150,46 +155,109 @@ export default function App() {
         <HeaderBanner />
 
         {/* Global Navigation Mode Switcher */}
-        <div className="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/80 p-1 rounded-2xl mb-3 shadow-lg">
+        <nav aria-label="Game navigation" className="flex flex-wrap items-center justify-center gap-1.5 bg-slate-900/90 border border-slate-700/80 p-1.5 rounded-2xl mb-3 shadow-lg">
           <button
             type="button"
-            onClick={() => setCurrentScreen('CHARACTER_SELECT')}
-            className={`px-3 sm:px-4 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
-              currentScreen === 'CHARACTER_SELECT'
-                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-md scale-102'
+            onClick={() => setCurrentScreen('MAIN_MENU')}
+            className={`px-3 sm:px-3.5 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentScreen === 'MAIN_MENU'
+                ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <span>👥</span>
-            <span>Character Selection</span>
+            <span>🏠</span>
+            <span>Main Menu</span>
           </button>
 
           <button
             type="button"
             onClick={() => setCurrentScreen('GAME_BOARD')}
-            className={`px-3 sm:px-4 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 sm:px-3.5 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               currentScreen === 'GAME_BOARD'
-                ? 'bg-emerald-600 text-white shadow-md scale-102'
+                ? 'bg-emerald-600 text-white shadow-md font-black'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <span>🏟️</span>
+            <span>⚽</span>
             <span>Championship Pitch</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setCurrentScreen('ANIMATION_STUDIO')}
-            className={`px-3 sm:px-4 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
-              currentScreen === 'ANIMATION_STUDIO'
-                ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md scale-102 ring-2 ring-red-400/50'
+            onClick={() => setCurrentScreen('CHARACTER_SELECT')}
+            className={`px-3 sm:px-3.5 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentScreen === 'CHARACTER_SELECT'
+                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <span>⚡</span>
-            <span>All Stars Animations</span>
+            <span>👥</span>
+            <span>Select Stars</span>
           </button>
-        </div>
+
+          {/* Quick Access to How to Play */}
+          <button
+            type="button"
+            onClick={() => setShowHowToPlay(true)}
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold text-sky-300 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1 border border-sky-400/30 cursor-pointer"
+            title="How to Play Instructions"
+          >
+            <span>📖</span>
+            <span className="hidden xs:inline">How to Play</span>
+          </button>
+
+          {/* Quick Access to Settings */}
+          <button
+            type="button"
+            onClick={() => setShowSettings(true)}
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold text-emerald-300 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-1 border border-emerald-400/30 cursor-pointer"
+            title="Game & Sound Settings"
+          >
+            <span>⚙️</span>
+            <span className="hidden xs:inline">Settings</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentScreen('ANIMATION_STUDIO')}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-cartoon text-xs sm:text-sm font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              currentScreen === 'ANIMATION_STUDIO'
+                ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+            title="Preview all 8 footballers animations"
+          >
+            <span>⚡</span>
+            <span className="hidden sm:inline">Animations</span>
+          </button>
+        </nav>
+
+        {/* Global How to Play Modal */}
+        <HowToPlayModal
+          isOpen={showHowToPlay}
+          onClose={() => setShowHowToPlay(false)}
+          onStartGame={() => setCurrentScreen('GAME_BOARD')}
+        />
+
+        {/* Global Settings Modal */}
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
+
+        {/* SCREEN 0: MAIN MENU SCREEN */}
+        {currentScreen === 'MAIN_MENU' && (
+          <MainMenu
+            playerCount={playerCount}
+            selectedAssignments={selectedAssignments}
+            playerNames={playerNames}
+            onPlayGame={() => setCurrentScreen('GAME_BOARD')}
+            onCharacterSelection={() => setCurrentScreen('CHARACTER_SELECT')}
+            onHowToPlay={() => setShowHowToPlay(true)}
+            onOpenSettings={() => setShowSettings(true)}
+            onOpenAnimationStudio={() => setCurrentScreen('ANIMATION_STUDIO')}
+          />
+        )}
 
         {/* SCREEN 1: Character Selection Screen */}
         {currentScreen === 'CHARACTER_SELECT' && (
@@ -204,7 +272,7 @@ export default function App() {
             onQuickPickAll={handleQuickPickAll}
             onResetAll={handleResetAll}
             onContinue={() => setCurrentScreen('GAME_BOARD')}
-            onBack={() => setCurrentScreen('GAME_BOARD')}
+            onBack={() => setCurrentScreen('MAIN_MENU')}
             onOpenAnimationStudio={() => setCurrentScreen('ANIMATION_STUDIO')}
           />
         )}
@@ -217,6 +285,8 @@ export default function App() {
               playerCount={playerCount}
               onOpenCharacterSelect={() => setCurrentScreen('CHARACTER_SELECT')}
               onOpenAnimationStudio={() => setCurrentScreen('ANIMATION_STUDIO')}
+              onGoToMainMenu={() => setCurrentScreen('MAIN_MENU')}
+              onOpenHowToPlay={() => setShowHowToPlay(true)}
             />
             {/* Board Legend & Layout Explanations */}
             <BoardLegend />

@@ -47,34 +47,34 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               <div
                 key={`score-player-${player.id}`}
                 className={`
-                  relative rounded-xl p-1.5 sm:p-2 transition-all duration-300 border flex flex-col justify-between
+                  relative rounded-xl p-2 sm:p-2.5 transition-all duration-300 border flex flex-col justify-between
                   ${
                     isTurn
-                      ? `bg-slate-800/95 border-amber-400 ring-2 ring-amber-400/50 shadow-[0_0_15px_rgba(250,204,21,0.35)] scale-[1.02]`
-                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                      ? `bg-slate-800/95 border-amber-400 ring-2 ring-amber-400 shadow-[0_0_16px_rgba(250,204,21,0.4)] scale-[1.02] z-10`
+                      : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 opacity-90'
                   }
                 `}
               >
                 {/* Active Turn Floating Crown / Marker */}
                 {isTurn && (
-                  <div className="absolute -top-2 right-2 bg-amber-400 text-slate-950 text-[9px] font-black font-cartoon px-1.5 py-0.2 rounded-full shadow-md flex items-center gap-0.5 animate-bounce">
-                    <span>👑</span>
+                  <div className="absolute -top-2.5 right-2 bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 text-[10px] font-black font-cartoon px-2 py-0.5 rounded-full shadow-lg border border-white flex items-center gap-1 animate-pulse">
+                    <span>⚽</span>
                     <span>TURN</span>
                   </div>
                 )}
 
                 {/* Top Row: Avatar + Name + Jersey */}
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5">
+                <div className="flex items-center gap-2 mb-1.5">
                   <div className="relative shrink-0">
                     <img
                       src={player.portrait}
                       alt={player.name}
-                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 ${
-                        isTurn ? 'border-amber-400' : 'border-slate-600'
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 shadow-sm ${
+                        isTurn ? 'border-amber-400 ring-2 ring-amber-300/60' : 'border-slate-600'
                       }`}
                     />
                     <span
-                      className={`absolute -bottom-1 -right-1 text-[8px] font-black px-1 rounded-full border border-black/40 ${player.theme.badgeBg} ${player.theme.badgeText}`}
+                      className={`absolute -bottom-1 -right-1 text-[9px] font-black px-1.5 py-0.2 rounded-full border border-black/50 ${player.theme.badgeBg} ${player.theme.badgeText} shadow`}
                     >
                       #{player.characterNumber}
                     </span>
@@ -82,9 +82,9 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
                   <div className="min-w-0 flex-1">
                     <div className="font-cartoon font-bold text-xs sm:text-sm text-white truncate leading-tight flex items-center gap-1">
-                      <span>{player.name}</span>
+                      <span className="truncate">{player.name}</span>
                     </div>
-                    <div className="text-[10px] text-slate-400 truncate leading-none mt-0.5">
+                    <div className="text-[11px] text-amber-300/90 truncate leading-none mt-0.5 font-medium">
                       {player.characterName}
                     </div>
                   </div>
@@ -92,20 +92,20 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
                 {/* Middle Row: Current Square and Progress */}
                 <div className="mt-auto">
-                  <div className="flex items-center justify-between text-[11px] mb-1">
-                    <span className="text-slate-400 text-[10px] font-bold">Square:</span>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Position:</span>
                     <span className="font-black font-cartoon text-amber-300 text-xs sm:text-sm">
-                      {player.currentSquare}
+                      Sq {player.currentSquare}
                       <span className="text-slate-500 text-[10px]"> / 100</span>
                     </span>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full bg-slate-950 h-1.5 sm:h-2 rounded-full overflow-hidden border border-slate-800">
+                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800 shadow-inner">
                     <div
                       className={`h-full transition-all duration-300 rounded-full ${
                         isTurn
-                          ? 'bg-gradient-to-r from-amber-400 to-yellow-500'
+                          ? 'bg-gradient-to-r from-amber-400 to-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'
                           : 'bg-emerald-500'
                       }`}
                       style={{ width: `${progressPercent}%` }}
@@ -113,9 +113,9 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                   </div>
 
                   {/* Bottom Stats: Last roll */}
-                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-slate-800/80 text-[10px] text-slate-400">
-                    <span>Last Roll:</span>
-                    <span className="font-mono font-bold text-white">
+                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-slate-800 text-[10px] text-slate-400">
+                    <span className="font-medium">Last Roll:</span>
+                    <span className="font-mono font-bold text-white text-[11px]">
                       {player.lastRoll ? `🎲 ${player.lastRoll}` : '—'}
                     </span>
                   </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GamePlayer, getCoordinatesForSquare, getSpecialEvent } from '../types/game';
 import { Dice3D } from './Dice3D';
 import { soundEngine } from '../utils/audio';
@@ -17,6 +17,7 @@ interface TurnControlsProps {
   onOpenCharacterSelect?: () => void;
   isDevModeActive?: boolean;
   onToggleDevMode?: () => void;
+  onOpenSoundSettings?: () => void;
 }
 
 export const TurnControls: React.FC<TurnControlsProps> = ({
@@ -33,10 +34,18 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
   onOpenCharacterSelect,
   isDevModeActive = false,
   onToggleDevMode,
+  onOpenSoundSettings,
 }) => {
   const [isMuted, setIsMuted] = useState<boolean>(soundEngine.getMuted());
   const coords = getCoordinatesForSquare(currentPlayer.currentSquare);
   const specialEvent = getSpecialEvent(currentPlayer.currentSquare);
+
+  useEffect(() => {
+    const unsub = soundEngine.subscribe((s) => {
+      setIsMuted(s.isMasterMuted || (s.isMusicMuted && s.isSfxMuted));
+    });
+    return unsub;
+  }, []);
 
   const handleToggleSound = () => {
     const next = soundEngine.toggleMuted();
@@ -86,6 +95,7 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
 
           {/* CENTER: 3D DICE & ROLL BUTTON */}
           <div className="flex flex-col items-center justify-center py-1">
+            {/* 3D Dice */}
             <Dice3D
               value={diceValue}
               isRolling={isRolling}
@@ -95,8 +105,15 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
               themeColor={currentPlayer.theme.accentHex}
             />
 
-            {/* Turn status note */}
-            <div className="text-center mt-1.5">
+            {/* Turn status & Dice Result Callout */}
+            <div className="flex flex-col items-center gap-1 mt-1.5">
+              <div className="flex items-center gap-1.5 bg-slate-950/90 px-2.5 py-0.5 rounded-lg border border-slate-800">
+                <span className="text-[10px] font-mono text-slate-400 uppercase">Dice Result:</span>
+                <span className="text-sm font-black font-cartoon text-amber-300">
+                  🎲 {isRolling ? '...' : diceValue}
+                </span>
+              </div>
+
               <span
                 className={`text-[11px] font-cartoon font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${
                   isRolling
@@ -116,19 +133,26 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-slate-400 font-bold uppercase">Pitch Position:</span>
               <span className="font-cartoon font-black text-amber-300 text-sm sm:text-base">
-                Square {currentPlayer.currentSquare} / 100
+                Square {currentPlayer.currentSquare} <span className="text-slate-500 text-xs">/ 100</span>
               </span>
             </div>
 
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-400 text-[11px]">Grid Row:</span>
               <span className="font-bold text-slate-200 text-[11px]">
-                Row {coords.rowFromBottom + 1} ({coords.rowDirection === 'right' ? 'Heading ➔ Right' : 'Heading ⬅ Left'})
+                Row {coords.rowFromBottom + 1} ({coords.rowDirection === 'right' ? '➔ Heading Right' : '⬅ Heading Left'})
               </span>
             </div>
 
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400 text-[11px]">Target Landmark:</span>
+              <span className="text-slate-400 text-[11px]">To Trophy:</span>
+              <span className="font-bold text-yellow-300 text-[11px]">
+                {100 - currentPlayer.currentSquare === 0 ? '🏆 AT GOAL!' : `${100 - currentPlayer.currentSquare} Squares Needed`}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400 text-[11px]">Square Landmark:</span>
               <span className="font-bold text-emerald-300 text-[11px] truncate max-w-[130px]">
                 {currentPlayer.currentSquare === 1
                   ? '⚽ Kickoff START'
@@ -136,16 +160,32 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
                   ? '🏆 FINISH Trophy'
                   : specialEvent
                   ? `${specialEvent.icon} ${specialEvent.name}`
-                  : 'Pitch Lawn Turf'}
+                  : 'Pitch Turf'}
               </span>
             </div>
 
             {/* Quick Action Utility Buttons */}
             <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-xs gap-1 flex-wrap">
+              {onOpenSoundSettings && (
+                <button
+                  type="button"
+                  onClick={onOpenSoundSettings}
+                  className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-medium text-[11px] flex items-center gap-1 transition-colors border border-amber-400/30 hover:border-amber-400/60 cursor-pointer"
+                  title="Open stadium sound & volume settings"
+                >
+                  <span>⚙️</span>
+                  <span>Settings</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleToggleSound}
-                className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                className={`px-2 py-1 rounded font-medium text-[11px] flex items-center gap-1 transition-colors cursor-pointer ${
+                  isMuted
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                }`}
                 title={isMuted ? 'Unmute game sounds' : 'Mute game sounds'}
               >
                 <span>{isMuted ? '🔇' : '🔊'}</span>

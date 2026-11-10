@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { GamePlayer, PlayerToken, SoccerEventAction } from '../types/game';
 import { CHARACTERS } from '../data/characters';
 import { getSoccerEventAction } from '../utils/soccerEvents';
-import { soundEngine } from '../utils/audio';
+import { audioManager, soundEngine } from '../utils/audio';
 import { FootballerAnimationState } from '../types/animation';
 
 interface UseSoccerGameProps {
@@ -85,6 +85,14 @@ export function useSoccerGame({
     };
   }, []);
 
+  // Manage stadium background ambience for the match
+  useEffect(() => {
+    audioManager.startAmbience();
+    return () => {
+      audioManager.stopAmbience(0.2);
+    };
+  }, []);
+
   const currentPlayer = players[currentPlayerIndex] || players[0];
 
   /**
@@ -93,6 +101,9 @@ export function useSoccerGame({
    */
   const rollDice = useCallback((forcedValue?: number) => {
     if (isRolling || isMoving || isGameOver) return;
+
+    // Ensure stadium ambience is running when match turn starts
+    audioManager.startAmbience();
 
     // 1. Begin 3D dice roll animation
     setIsRolling(true);
@@ -170,7 +181,7 @@ export function useSoccerGame({
         }
 
         const nextSq = path[stepIdx];
-        soundEngine.playStep();
+        soundEngine.playKick();
 
         // Update player position for live rendering
         setPlayers((prev) =>
@@ -234,6 +245,7 @@ export function useSoccerGame({
       };
       setWinner(winPlayer);
       setStatusMessage(`🏆 GOAL! ${currentPlayer.name} reached Square 100 and WON the Championship!`);
+      soundEngine.stopAmbience(0.4);
       soundEngine.playVictory();
       return;
     }
@@ -252,8 +264,14 @@ export function useSoccerGame({
       } else if (event.type === 'save') {
         setActiveAnimationState('celebrating');
         soundEngine.playSave();
+      } else if (event.type === 'yellow_card') {
+        setActiveAnimationState('falling');
+        soundEngine.playYellowCard();
+      } else if (event.type === 'red_card') {
+        setActiveAnimationState('falling');
+        soundEngine.playRedCard();
       } else {
-        // Yellow or Red Card
+        // Fallback card or foul event
         setActiveAnimationState('falling');
         soundEngine.playCardBuzzer();
       }
@@ -321,7 +339,7 @@ export function useSoccerGame({
       }
 
       const sq = secondaryPath[idx];
-      soundEngine.playStep();
+      soundEngine.playKick();
 
       setPlayers((prev) =>
         prev.map((p, pIdx) =>
@@ -392,6 +410,7 @@ export function useSoccerGame({
     setWinner(null);
     setLastBounced(null);
     setStatusMessage('New match kicked off! Player 1, roll the dice!');
+    soundEngine.startAmbience();
   }, []);
 
   /**
@@ -526,6 +545,7 @@ export function useSoccerGame({
     };
     setWinner(winPlayer);
     setStatusMessage(`[DEV] Championship Victory Screen triggered for ${targetPlayer.name}!`);
+    soundEngine.stopAmbience(0.4);
     soundEngine.playVictory();
   }, [currentPlayerIndex, players, currentPlayer]);
 

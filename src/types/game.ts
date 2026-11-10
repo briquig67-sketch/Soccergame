@@ -100,8 +100,49 @@ export interface PlayerToken {
   name: string;
   role: string;
   avatarIcon: string;
+  portraitImage?: string;
+  characterNumber?: number;
+  characterName?: string;
+  characterId?: string;
   colorClass: string;
   borderClass: string;
+}
+
+export interface SoccerEventAction {
+  square: number;
+  type: SpecialEventType;
+  title: string;
+  subtitle: string;
+  message: string;
+  delta: number; // Positive = advance forward, Negative = fall back
+  destination: number;
+  soundType: 'whistle' | 'cheer' | 'sprint' | 'card' | 'save';
+}
+
+export interface GamePlayer {
+  id: number; // 1, 2, 3, 4
+  playerIndex: number; // 0, 1, 2, 3
+  name: string;
+  characterId: string;
+  characterName: string;
+  characterNumber: number;
+  portrait: string;
+  avatarEmoji: string;
+  theme: {
+    primary: string;
+    secondary: string;
+    borderClass: string;
+    glowClass: string;
+    badgeBg: string;
+    badgeText: string;
+    accentHex: string;
+  };
+  currentSquare: number; // 1 to 100
+  previousSquare: number;
+  lastRoll: number | null;
+  turnsTaken: number;
+  eventsTriggered: number;
+  isWinner: boolean;
 }
 
 export const DEMO_PLAYERS: PlayerToken[] = [
@@ -153,6 +194,46 @@ export function getSquareNumber(rowFromBottom: number, colIndex: number): number
     // Right-to-left
     return rowFromBottom * 10 + (9 - colIndex) + 1;
   }
+}
+
+export interface SquareCoordinates {
+  squareNumber: number;
+  rowFromBottom: number; // 0 (bottom row) to 9 (top row)
+  gridRow: number;       // 0 (top row) to 9 (bottom row) for CSS positioning
+  colIndex: number;      // 0 (left) to 9 (right)
+  percentX: number;      // 0% - 100% center X within pitch container
+  percentY: number;      // 0% - 100% center Y within pitch container
+  isEvenRow: boolean;
+  rowDirection: 'right' | 'left';
+}
+
+/**
+ * Calculates the exact board position and center percentage for any square 1-100
+ */
+export function getCoordinatesForSquare(squareNumber: number): SquareCoordinates {
+  const clampedNum = Math.max(1, Math.min(100, Math.floor(squareNumber)));
+  const rowFromBottom = Math.floor((clampedNum - 1) / 10);
+  const isEvenRow = rowFromBottom % 2 === 0;
+  const colIndex = isEvenRow
+    ? (clampedNum - 1) % 10
+    : 9 - ((clampedNum - 1) % 10);
+  const gridRow = 9 - rowFromBottom;
+
+  // Center coordinate in percentages (each cell is 10% x 10%)
+  const percentX = colIndex * 10 + 5;
+  const percentY = gridRow * 10 + 5;
+  const rowDirection: 'right' | 'left' = isEvenRow ? 'right' : 'left';
+
+  return {
+    squareNumber: clampedNum,
+    rowFromBottom,
+    gridRow,
+    colIndex,
+    percentX,
+    percentY,
+    isEvenRow,
+    rowDirection,
+  };
 }
 
 /**

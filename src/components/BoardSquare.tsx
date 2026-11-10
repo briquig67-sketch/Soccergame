@@ -113,14 +113,22 @@ export const BoardSquare: React.FC<BoardSquareProps> = ({
                 <div
                   key={`player-${slotIndex}`}
                   className={`
-                    w-full h-full rounded-full flex items-center justify-center
+                    w-full h-full rounded-full flex items-center justify-center overflow-hidden
                     shadow-md font-bold text-[8px] sm:text-[10px] md:text-xs
-                    border ${playerInSlot.borderClass} ${playerInSlot.colorClass}
+                    border-2 ${playerInSlot.borderClass} ${playerInSlot.colorClass}
                     transform transition-transform hover:scale-125
                   `}
                   title={`Player ${playerInSlot.id}: ${playerInSlot.name}`}
                 >
-                  <span className="leading-none">{playerInSlot.avatarIcon}</span>
+                  {playerInSlot.portraitImage ? (
+                    <img
+                      src={playerInSlot.portraitImage}
+                      alt={playerInSlot.name}
+                      className="w-full h-full object-cover object-top"
+                    />
+                  ) : (
+                    <span className="leading-none">{playerInSlot.avatarIcon}</span>
+                  )}
                 </div>
               );
             }

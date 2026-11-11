@@ -1,13 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Fredoka", cursive, sans-serif;
-  --font-sans: "Outfit", sans-serif;
+  --font-display: "Fredoka", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, cursive, sans-serif;
+  --font-sans: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-body {
+:root {
+  /* Safe area insets for Android notches & navigation bars */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+html, body {
   font-family: var(--font-sans);
   overflow-x: hidden;
+  background-color: #020617;
+  color: #f1f5f9;
+  /* Optimizations for Android touch interaction */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+/* Ensure buttons and interactive cards respond immediately to touch without zoom delays */
+button, [role="button"], a {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 h1, h2, h3, .font-cartoon {
